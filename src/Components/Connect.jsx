@@ -1,8 +1,24 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { MapPin, Mail, Phone, Send, MessageSquare } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MapPin, Mail, Send, MessageSquare, CheckCircle2, Loader2 } from 'lucide-react';
 
 const Connect = () => {
+  const [formStatus, setFormStatus] = useState('idle'); // 'idle' | 'sending' | 'success'
+
+  const handleSubmit = (e) => {
+    e.preventDefault(); // Page reload rokne ke liye
+    setFormStatus('sending');
+
+    // Fake API call simulation (2 seconds)
+    setTimeout(() => {
+      setFormStatus('success');
+    }, 2000);
+  };
+
+  const resetForm = () => {
+    setFormStatus('idle');
+  };
+
   return (
     <div className="bg-slate-50 min-h-screen pt-20 pb-20 font-sans">
       
@@ -83,7 +99,7 @@ const Connect = () => {
                 </div>
               </div>
 
-              {/* Bottom Social/Extra (Optional) */}
+              {/* Bottom Social/Extra */}
               <div className="mt-12 pt-8 border-t border-slate-800">
                 <div className="flex items-center gap-2 text-slate-500 text-sm">
                   <MessageSquare size={16} />
@@ -92,46 +108,106 @@ const Connect = () => {
               </div>
             </div>
 
-            {/* RIGHT SIDE: Contact Form (White) */}
-            <div className="lg:w-3/5 p-10 md:p-14 bg-white">
-              <h3 className="text-2xl font-bold text-slate-900 mb-8">Send a Message</h3>
-              
-              <form className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
-                  <input 
-                    type="text" 
-                    placeholder="John Doe" 
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-slate-50"
-                  />
-                </div>
+            {/* RIGHT SIDE: Dynamic Form with Animation */}
+            <div className="lg:w-3/5 p-10 md:p-14 bg-white relative">
+              <AnimatePresence mode='wait'>
+                
+                {formStatus === 'success' ? (
+                  // SUCCESS ANIMATION VIEW
+                  <motion.div 
+                    key="success"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                    className="h-full flex flex-col items-center justify-center text-center py-10"
+                  >
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                      className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6"
+                    >
+                      <CheckCircle2 className="text-green-600 w-12 h-12" />
+                    </motion.div>
+                    <h3 className="text-3xl font-bold text-slate-900 mb-2">Message Sent!</h3>
+                    <p className="text-slate-500 mb-8 max-w-sm">
+                      Thank you for reaching out. Our team will review your message and get back to you within 24 hours.
+                    </p>
+                    <button 
+                      onClick={resetForm}
+                      className="text-blue-600 font-semibold hover:text-blue-700 transition-colors"
+                    >
+                      Send another message
+                    </button>
+                  </motion.div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
-                  <input 
-                    type="email" 
-                    placeholder="john@example.com" 
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-slate-50"
-                  />
-                </div>
+                ) : (
+                  // FORM VIEW
+                  <motion.div
+                    key="form"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <h3 className="text-2xl font-bold text-slate-900 mb-8">Send a Message</h3>
+                    
+                    <form className="space-y-6" onSubmit={handleSubmit}>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
+                        <input 
+                          required
+                          type="text" 
+                          placeholder="John Doe" 
+                          className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-slate-50"
+                        />
+                      </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Message</label>
-                  <textarea 
-                    rows="4" 
-                    placeholder="Tell us about your project..." 
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-slate-50 resize-none"
-                  ></textarea>
-                </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
+                        <input 
+                          required
+                          type="email" 
+                          placeholder="john@example.com" 
+                          className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-slate-50"
+                        />
+                      </div>
 
-                <motion.button 
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition-all"
-                >
-                  Send Message <Send size={18} />
-                </motion.button>
-              </form>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Message</label>
+                        <textarea 
+                          required
+                          rows="4" 
+                          placeholder="Tell us about your project..." 
+                          className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-slate-50 resize-none"
+                        ></textarea>
+                      </div>
+
+                      <motion.button 
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        disabled={formStatus === 'sending'}
+                        className={`w-full font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all ${
+                          formStatus === 'sending' 
+                            ? 'bg-blue-400 cursor-not-allowed text-white' 
+                            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30'
+                        }`}
+                      >
+                        {formStatus === 'sending' ? (
+                          <>
+                            <Loader2 className="animate-spin" size={20} /> Sending...
+                          </>
+                        ) : (
+                          <>
+                            Send Message <Send size={18} />
+                          </>
+                        )}
+                      </motion.button>
+                    </form>
+                  </motion.div>
+                )}
+
+              </AnimatePresence>
             </div>
 
           </motion.div>
